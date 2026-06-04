@@ -87,6 +87,14 @@ O projeto separa parte da regra de negócio em serviços específicos:
 - `reportService.ts`: cálculos reais para dashboard e relatórios.
 - `validationService.ts`: validações reutilizáveis de produtos e categorias.
 
+
+## Prints de funcionamento
+
+<img width="2559" height="1397" alt="TelaLogin" src="https://github.com/user-attachments/assets/b5ee4993-b345-41e9-82f2-1d12deb9e6e4" />
+<img width="2559" height="1394" alt="TelaCadastro" src="https://github.com/user-attachments/assets/c0a64e78-7c87-4c5e-8b96-4f2d99f808b7" />
+<img width="2559" height="1344" alt="Interface" src="https://github.com/user-attachments/assets/d94f0ae2-805f-4e82-a195-a527ee0fce90" />
+
+
 ## Regras de Negócio
 
 - SKU de produto deve ser único.
