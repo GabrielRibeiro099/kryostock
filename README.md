@@ -1,121 +1,195 @@
 # KryoStock
 
-**Aplicativo portátil de controle de estoque desenvolvido com React, TypeScript, Vite e Go.**
+**KryoStock** é um aplicativo portátil de controle de estoque desenvolvido como projeto de portfólio em Engenharia de Software. A proposta é oferecer uma ferramenta local para pequenos controles operacionais, com cadastro de produtos, categorias, movimentações, dashboard, relatórios, configurações de usuário, backup JSON e execução portátil no Windows.
 
-O KryoStock é um projeto de portfólio desenvolvido com o objetivo de criar uma solução simples, local e funcional para controle de estoque.
+## Descrição
 
-A proposta do sistema não é ser um ERP, mas sim um aplicativo focado exclusivamente em gerenciamento de produtos, categorias, movimentações e indicadores de estoque.
+O sistema foi desenvolvido com React, TypeScript e Vite, com foco em uma interface moderna, limpa e objetiva. A versão portátil usa um launcher local em Go para servir o build da aplicação, abrir o app em modo janela e salvar os dados em um arquivo JSON dentro da própria pasta do aplicativo.
 
-## Visão geral
+## Como usar a versão portátil
 
-O KryoStock permite controlar produtos, categorias, entradas, saídas, ajustes e correções de inventário de forma local.
+1. Extraia todos os arquivos em uma pasta limpa.
+2. Mantenha `KryoStock.exe`, `dist/`, `public/` e a estrutura do projeto na mesma pasta.
+3. Execute **KryoStock.exe**.
+4. Cadastre seu usuário local.
+5. Use produtos, categorias, movimentações, dashboard, relatórios e configurações.
+6. Os dados ficam salvos localmente na pasta `dados/`.
 
-O sistema possui dashboard, relatórios, backup em JSON, modo claro/escuro e versão portátil para Windows.
+> Importante: mantenha apenas o executável principal `KryoStock.exe`. Esta versão foi organizada para não ter executáveis duplicados.
+
+## Objetivo do Projeto
+
+O objetivo do KryoStock é demonstrar, em um projeto realista de portfólio júnior, conceitos como CRUD, regras de negócio, persistência local, autenticação local, validações, relatórios, backup, organização de componentes e empacotamento portátil para Windows.
+
+O KryoStock **não é um ERP**. Ele é focado exclusivamente em controle de estoque local.
 
 ## Funcionalidades
 
-- Cadastro de produtos
-- Cadastro de categorias
-- Registro de entradas
-- Registro de saídas
-- Ajustes positivos e negativos
-- Correção de inventário
-- Histórico de movimentações
-- Exclusão controlada de movimentações
-- Dashboard com indicadores
-- Relatórios com dados reais
-- Produtos com estoque baixo
-- Configurações de usuário
-- Backup local em JSON
-- Importação de backup
-- Modo claro e escuro
-- Versão portátil para Windows
+- Login e cadastro local de usuários.
+- Cadastro, edição, exclusão e inativação de produtos.
+- Cadastro e edição de categorias.
+- Bloqueio de exclusão de categorias em uso.
+- Movimentações de entrada, saída, ajuste positivo, ajuste negativo e correção de inventário.
+- Exclusão controlada de movimentações, com recálculo de estoque e proteção contra inconsistências.
+- Bloqueio de saída maior que o estoque disponível.
+- Dashboard com indicadores baseados nos dados reais.
+- Relatórios de estoque e movimentações sem dados aleatórios.
+- Configurações de usuário com nome, avatar, senha e tema.
+- Exportação e importação de backup JSON.
+- Proteção contra tela branca por erro inesperado.
+- Versão portátil para Windows com persistência local.
+- Interface com modo claro e modo escuro.
+- Logo e ícone do KryoStock aplicados ao aplicativo e ao executável.
 
-## Tecnologias utilizadas
+## Tecnologias Utilizadas
 
 - React
 - TypeScript
 - Vite
 - Tailwind CSS
 - Recharts
-- Vitest
-- Go
+- Radix UI / componentes de interface
+- Sonner para notificações
+- Go para o launcher portátil
+- Vitest para testes automatizados básicos
 
-## Conceitos aplicados
+## Estrutura do Projeto
 
-- Componentização
-- CRUD
-- Regras de negócio
-- Validação de dados
-- Persistência local
-- Backup em JSON
-- Testes automatizados básicos
-- Tratamento de erros
-- Empacotamento portátil para Windows
-- Documentação técnica
+```txt
+src/app/
+  App.tsx
+  components/
+  services/
+    authService.ts
+    storageService.ts
+    reportService.ts
+    inventoryService.ts
+    movementService.ts
+    categoryService.ts
+    validationService.ts
+  hooks/
+  tests/
+launcher/
+  main.go
+dist/
+  build final do aplicativo
+```
 
-## Screenshots
+## Arquitetura e Organização
 
-### Tela de Login
+O projeto separa parte da regra de negócio em serviços específicos:
 
-<img width="2559" height="1397" alt="TelaLogin" src="https://github.com/user-attachments/assets/e64586bb-6e06-4b29-a902-b1d29312c344" />
+- `authService.ts`: normalização de e-mail, hash local, verificação de senha e migração de senhas antigas.
+- `storageService.ts`: estrutura versionada, normalização, migração, carregamento, salvamento, backup e fallback local.
+- `inventoryService.ts`: criação, atualização, exclusão e inativação de produtos.
+- `movementService.ts`: validação, aplicação e exclusão controlada das movimentações de estoque.
+- `categoryService.ts`: validação, criação, edição e bloqueio de exclusão de categorias em uso.
+- `reportService.ts`: cálculos reais para dashboard e relatórios.
+- `validationService.ts`: validações reutilizáveis de produtos e categorias.
 
+## Regras de Negócio
 
-### Tela de Cadastro
+- SKU de produto deve ser único.
+- Produto precisa ter nome, SKU, categoria, unidade, custo, preço e estoque válido.
+- Estoque não pode ficar negativo.
+- Saída e ajuste negativo não podem ser maiores que o estoque disponível.
+- Correção de inventário define a quantidade final real.
+- Movimentações registram produto, tipo, quantidade, data, motivo, usuário, estoque anterior e estoque novo.
+- Movimentações podem ser excluídas somente quando a exclusão não deixa o histórico posterior inconsistente.
+- Categoria em uso não pode ser excluída.
+- Produto com histórico de movimentações é inativado em vez de excluído fisicamente.
+- Produtos inativos preservam histórico e não entram como ativos nos indicadores principais.
 
-<img width="2559" height="1394" alt="TelaCadastro" src="https://github.com/user-attachments/assets/12f22f14-cbc6-4ba9-bffb-ef7b8677ce1f" />
+## Persistência de Dados
 
+A estrutura persistida usa `schemaVersion` e separa usuários, sessão, estoque e configurações. Na versão portátil, o app prioriza a API local do launcher (`/api/data`) para salvar em arquivo JSON. No navegador comum, usa `localStorage` como fallback.
 
-### Interface
+## Autenticação Local
 
-<img width="2559" height="1344" alt="Interface" src="https://github.com/user-attachments/assets/625a829a-853b-4d49-b3a3-1b6d1bc6c92e" />
+A autenticação é local e serve para identificar o usuário dentro do aplicativo portátil. Senhas novas são armazenadas com hash local e salt por usuário. Esse mecanismo evita texto puro, mas não substitui autenticação profissional com backend seguro.
 
+## Backup e Importação
 
-## Como rodar o projeto
-  npm install
-  npm run dev
+O usuário pode exportar um backup `.json` contendo dados do sistema e importar esse backup posteriormente. A importação valida e normaliza os dados antes de substituir o estado atual.
 
-Como gerar build
-  npm run build
+## Relatórios e Dashboard
 
-Como rodar os testes
-  npm run test
+Os relatórios e o dashboard usam dados reais de produtos, categorias e movimentações. Não há geração de valores aleatórios para simular gráficos.
 
-Download da versão portátil
+## Versão Portátil para Windows
 
-A versão portátil para Windows está disponível na aba Releases deste repositório.
+O arquivo `KryoStock.exe` funciona como launcher local. Ele sobe um servidor HTTP local, serve a pasta `dist`, abre o app em modo janela usando Microsoft Edge ou Google Chrome e salva os dados na pasta `dados`.
 
-Aviso do Windows SmartScreen
+Comando para recompilar o launcher:
 
-Ao executar o KryoStock.exe pela primeira vez, o Windows pode exibir o aviso:
+```bash
+cd launcher
+go build -ldflags="-H windowsgui" -o ../KryoStock.exe main.go
+```
 
-“O Windows protegeu o computador”
+## Aviso sobre Windows SmartScreen
 
-Esse aviso aparece porque o executável ainda não possui assinatura digital reconhecida ou reputação pública suficiente no Microsoft Defender SmartScreen.
+Na primeira execução, o Windows pode mostrar a mensagem **“O Windows protegeu o computador”**.
 
-Isso é comum em aplicativos independentes sem certificado de assinatura de código.
+Isso é um aviso do **Microsoft Defender SmartScreen**. Ele aparece quando um executável baixado da internet ainda não possui reputação pública suficiente ou não está assinado com um certificado de assinatura de código reconhecido.
 
-Limitações conhecidas
-A autenticação é local
-Os dados são armazenados localmente
-Não há sincronização em nuvem
-Não há banco de dados externo
-Não há multiusuário em rede
-O executável pode exibir aviso do SmartScreen
-O sistema é focado em controle de estoque, não em ERP completo
-Roadmap
-Aumentar cobertura de testes
-Adicionar exportação CSV
-Adicionar importação de produtos por CSV/Excel
-Estudar persistência com SQLite local
-Criar versão demonstrativa online
-Melhorar relatórios avançados
-Implementar assinatura digital do executável
-Status
+Esse aviso não significa automaticamente que o KryoStock é malware. Ele indica que o Windows ainda não reconhece publicamente o arquivo como um aplicativo com reputação estabelecida.
 
-Versão 1.0.0 finalizada para portfólio.
+Para remover definitivamente esse aviso em computadores de terceiros, a distribuição profissional precisa de:
 
-Autor
+1. Certificado de assinatura de código emitido por uma Autoridade Certificadora reconhecida.
+2. Assinatura Authenticode aplicada ao `KryoStock.exe`.
+3. Tempo/reputação de distribuição para o SmartScreen reconhecer o aplicativo como confiável.
 
-Desenvolvido por Gabriel Ribeiro como projeto de portfólio em Engenharia de Software.
+Enquanto o executável não for assinado digitalmente, o SmartScreen pode exibir esse aviso em algumas máquinas, principalmente na primeira execução após download.
 
+## Como Rodar em Desenvolvimento
+
+```bash
+npm install
+npm run dev
+```
+
+## Como Gerar Build
+
+```bash
+npm run build
+```
+
+## Como Rodar os Testes
+
+```bash
+npm run test
+```
+
+## Limitações Conhecidas
+
+- A autenticação é local e não substitui autenticação profissional de produção.
+- Os dados são armazenados localmente, sem sincronização em nuvem.
+- Não há banco de dados externo.
+- Não há multiusuário real em rede.
+- O launcher depende de Microsoft Edge ou Google Chrome instalado.
+- O aviso do Windows SmartScreen só é removido definitivamente com assinatura digital reconhecida.
+- A segurança é limitada ao contexto local/portátil.
+- O projeto é um sistema de portfólio em evolução, não um ERP empresarial completo.
+
+## Roadmap
+
+- Migrar persistência para SQLite local.
+- Adicionar exportação PDF.
+- Adicionar importação CSV/Excel.
+- Criar permissões por usuário.
+- Adicionar logs de auditoria.
+- Melhorar criptografia local.
+- Criar versão com Tauri, Electron ou Wails.
+- Adicionar filtros avançados nos relatórios.
+- Adicionar CI/CD.
+- Expandir cobertura de testes.
+
+## Aprendizados
+
+Este projeto aplica conceitos importantes para um desenvolvedor iniciante/júnior: componentização, estado, validação, regras de negócio, persistência, backup, relatórios, tratamento de erros, documentação e empacotamento portátil.
+
+## Aviso sobre Segurança
+
+O KryoStock foi desenvolvido para uso local e demonstração de portfólio. Para uso real em ambiente empresarial, seria necessário implementar autenticação robusta, criptografia forte, banco de dados adequado, backups automatizados, permissões, auditoria e controles de segurança adicionais.
